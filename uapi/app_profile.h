@@ -3,6 +3,10 @@
 
 #include <linux/types.h>
 
+#if !defined(__KERNEL__) && !defined(__cplusplus)
+#include <stdbool.h>
+#endif
+
 #define KSU_APP_PROFILE_VER 4
 #define KSU_MAX_PACKAGE_NAME 256
 /* NGROUPS_MAX for Linux is 65535 generally, but we only supports 32 groups. */

@@ -18,6 +18,18 @@ jobs:
         working-directory: kernel
         run: make check-format
 
+  uapi-headers:
+    name: UAPI Headers check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check
+        run: |
+          printf '#include "uapi/ksu.h"\nint main(void) { return 0; }\n' > /tmp/ksu_uapi.c
+          gcc -std=gnu11 -I. -Wall -Wextra -Werror -fsyntax-only /tmp/ksu_uapi.c
+          g++ -std=c++17 -I. -Wall -Wextra -Werror -x c++ -fsyntax-only /tmp/ksu_uapi.c
+
   rustfmt:
     name: Rustfmt check
     runs-on: ubuntu-latest
