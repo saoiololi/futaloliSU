@@ -36,16 +36,6 @@ class ThemeApplierTest {
     }
 
     @Test
-    fun `adaptive package picks dark card background`() {
-        writeImage(ThemePackageFormat.CARD_LIGHT_ENTRY)
-        writeImage(ThemePackageFormat.CARD_DARK_ENTRY)
-
-        val resolved = ThemeApplier.resolve(adaptivePackage(), dir, dark = true)
-
-        assertEquals(ThemePackageFormat.CARD_DARK_ENTRY, resolved.cardFile?.name)
-    }
-
-    @Test
     fun `adaptive package picks light variant and light background`() {
         writeImage(ThemePackageFormat.BACKGROUND_LIGHT_ENTRY)
         writeImage(ThemePackageFormat.BACKGROUND_DARK_ENTRY)

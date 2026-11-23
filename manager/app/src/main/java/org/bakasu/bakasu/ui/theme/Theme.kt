@@ -156,13 +156,11 @@ class ThemeConfig(
     var appearanceOverlay by mutableStateOf(AppearanceOverlay.None)
     var appliedThemeId by mutableStateOf<String?>(null)
     var appliedThemeData by mutableStateOf<ThemePackageData?>(null)
-    var appliedCardBackground by mutableStateOf<File?>(null)
 
     /** 解绑当前应用的主题包，并清掉它带来的背景与外观覆盖。 */
     fun detachAppliedTheme() {
         appliedThemeId = null
         appliedThemeData = null
-        appliedCardBackground = null
         customBackgroundUri = null
         amoledBackground = false
         appearanceOverlay = AppearanceOverlay.None
@@ -190,7 +188,6 @@ class ThemeConfig(
         appearanceOverlay = AppearanceOverlay.None
         appliedThemeId = null
         appliedThemeData = null
-        appliedCardBackground = null
     }
 }
 

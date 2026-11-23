@@ -6,7 +6,6 @@ import java.io.File
 data class ResolvedTheme(
     val variant: ThemeVariantData,
     val backgroundFile: File?,
-    val cardFile: File?,
 )
 
 /**
@@ -30,17 +29,6 @@ object ThemeApplier {
             ThemePackageFormat.BACKGROUND_LIGHT_ENTRY
         }
         val background = if (wantsBackground) File(dir, backgroundName).takeIf { it.isFile } else null
-        val wantsCard = if (pkg.isAdaptive) {
-            variant.hasCardBackground != false
-        } else {
-            pkg.hasCardBackground != false
-        }
-        val cardName = if (pkg.isAdaptive && dark) {
-            ThemePackageFormat.CARD_DARK_ENTRY
-        } else {
-            ThemePackageFormat.CARD_LIGHT_ENTRY
-        }
-        val card = if (wantsCard) File(dir, cardName).takeIf { it.isFile } else null
-        return ResolvedTheme(variant, background, card)
+        return ResolvedTheme(variant, background)
     }
 }

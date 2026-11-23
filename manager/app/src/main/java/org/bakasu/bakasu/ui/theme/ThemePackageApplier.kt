@@ -115,7 +115,6 @@ class ThemePackageApplier(
         variant.amoled?.let { themeConfig.amoledBackground = it }
 
         resolved.backgroundFile?.let { backgroundManager.applyThemeBackground(Uri.fromFile(it)) }
-        themeConfig.appliedCardBackground = resolved.cardFile
 
         if (persist) {
             backgroundManager.saveAppliedThemeId(themeConfig.appliedThemeId)
