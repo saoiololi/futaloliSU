@@ -40,15 +40,13 @@ jobs:
         with:
           components: rustfmt
 
-      - uses: LoliGothick/rustfmt-check@master
-        with:
-          token: ${{ github.token }}
-          working-directory: userspace/ksud
+      - name: Check userspace/ksud formatting
+        working-directory: userspace/ksud
+        run: cargo fmt -- --check
 
-      - uses: LoliGothick/rustfmt-check@master
-        with:
-          token: ${{ github.token }}
-          working-directory: userspace/ksuinit
+      - name: Check userspace/ksuinit formatting
+        working-directory: userspace/ksuinit
+        run: cargo fmt -- --check
 
   clippy:
     name: Clippy check
