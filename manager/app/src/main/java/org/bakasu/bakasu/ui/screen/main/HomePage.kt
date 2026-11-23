@@ -74,7 +74,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
+import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
@@ -617,8 +617,6 @@ private fun StatusCard(
             val tint = MaterialTheme.colorScheme.primaryContainer
             StatusCardBackground(
                 background = cardBackground,
-                tint = tint,
-                onTint = MaterialTheme.colorScheme.onPrimaryContainer,
             ) { surface ->
                 SettingsBaseWidget(
                     icon = Icons.TwoTone.TaskAlt,
@@ -631,6 +629,7 @@ private fun StatusCard(
                     ),
                     containerColor = surface?.containerColor ?: tint,
                     contentColor = surface?.contentColor,
+                    descriptionColor = surface?.descriptionColor,
                     isOnBackground = surface?.isOnBackground ?: true,
                     foreContent = {
                         Spacer(Modifier.width(8.dp))
@@ -705,14 +704,13 @@ private fun StatusCard(
 private data class StatusCardSurface(
     val containerColor: Color?,
     val contentColor: Color?,
+    val descriptionColor: Color?,
     val isOnBackground: Boolean,
 )
 
 @Composable
 private fun StatusCardBackground(
     background: File?,
-    tint: Color,
-    onTint: Color,
     content: @Composable (StatusCardSurface?) -> Unit,
 ) {
     Box(
@@ -721,16 +719,11 @@ private fun StatusCardBackground(
             .clip(LocalSegmentedItemShape.current),
     ) {
         if (background != null) {
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .background(tint.copy(alpha = 0.55f)),
-            )
             Image(
                 painter = rememberAsyncImagePainter(background),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                alignment = Alignment.TopCenter,
+                alignment = BiasAlignment(0f, -0.25f),
                 modifier = Modifier.matchParentSize(),
             )
             Box(
@@ -738,9 +731,8 @@ private fun StatusCardBackground(
                     .matchParentSize()
                     .background(
                         Brush.verticalGradient(
-                            0f to tint.copy(alpha = 0.35f),
-                            0.5f to tint.copy(alpha = 0.55f),
-                            1f to Color.Black.copy(alpha = 0.35f),
+                            0f to Color.Black.copy(alpha = 0.25f),
+                            1f to Color.Black.copy(alpha = 0.45f),
                         ),
                     ),
             )
@@ -749,7 +741,8 @@ private fun StatusCardBackground(
             if (background != null) {
                 StatusCardSurface(
                     containerColor = Color.Transparent,
-                    contentColor = onTint,
+                    contentColor = Color.White,
+                    descriptionColor = Color.White.copy(alpha = 0.85f),
                     isOnBackground = false,
                 )
             } else {
