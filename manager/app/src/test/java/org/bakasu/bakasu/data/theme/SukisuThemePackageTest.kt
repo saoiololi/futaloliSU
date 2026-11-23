@@ -180,6 +180,26 @@ class SukisuThemePackageTest {
     }
 
     @Test
+    fun `oversized card image is transcoded instead of skipped`() {
+        val oversized = ByteArray(ThemePackageFormat.MAX_IMAGE_BYTES.toInt() + 1)
+        val plain = buildZip(
+            mapOf(
+                "theme.json" to manifestJson("""{"version":2,"keyColor":17,"hasCardBackground":true}"""),
+                "card_background" to oversized,
+            ),
+        )
+
+        val names = entryNames(
+            SukisuThemePackage.normalizeToPlainZip(plain) { _, dimension ->
+                assertEquals(ThemePackageFormat.MAX_TRANSCODE_DIMENSION, dimension)
+                WEBP_BYTES
+            },
+        )
+
+        assertTrue(names.contains(ThemePackageFormat.CARD_LIGHT_ENTRY))
+    }
+
+    @Test
     fun `applier resolves the imported background file`() {
         val plain = buildZip(
             mapOf(

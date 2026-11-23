@@ -31,6 +31,7 @@ object ThemePackageFormat {
     const val MAX_TOTAL_BYTES = 12L * 1024 * 1024
     const val MAX_ENTRIES = 16
     const val MAX_IMAGE_DIMENSION = 4096
+    const val MAX_TRANSCODE_DIMENSION = 2048
     const val MAX_ENTRY_NAME_LENGTH = 128
 
     val IMAGE_ENTRIES: Set<String> = setOf(

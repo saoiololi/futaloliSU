@@ -90,7 +90,10 @@ object SukisuThemePackage {
      * Nova 专有条目（底栏图标、卡片贴纸、商店预览等）丢弃；
      * 背景开关缺省时按实际存在的图片补 true，避免「图在、但不显示」。
      */
-    fun normalizeToPlainZip(bytes: ByteArray): ByteArray {
+    fun normalizeToPlainZip(
+        bytes: ByteArray,
+        transcode: ImageTranscoder = ImageTranscoder { _, _ -> null },
+    ): ByteArray {
         val payload = if (isEncrypted(bytes)) decrypt(bytes) else bytes
         if (payload.size > MAX_PAYLOAD_BYTES) {
             throw ThemePackageException.TooLarge("主题包超过 ${MAX_PAYLOAD_BYTES / 1024 / 1024} MB")
@@ -108,17 +111,23 @@ object SukisuThemePackage {
                     val mapped = ENTRY_ALIASES[entry.name] ?: entry.name
                     val accepted = mapped == ThemePackageFormat.THEME_ENTRY || mapped in ThemePackageFormat.IMAGE_ENTRIES
                     if (accepted) {
-                        val limit = if (mapped == ThemePackageFormat.THEME_ENTRY) {
+                        val isManifest = mapped == ThemePackageFormat.THEME_ENTRY
+                        val limit = if (isManifest) {
                             ThemePackageFormat.MAX_MANIFEST_BYTES.toInt()
                         } else {
-                            ThemePackageFormat.MAX_IMAGE_BYTES.toInt()
+                            MAX_PAYLOAD_BYTES.toInt()
                         }
-                        // 超大图片（Nova 的卡片底图常见十几 MB）只丢该图，不让整包导入失败。
-                        val data = try {
+                        val raw = try {
                             zipIn.readEntryBytes(limit, entry.name)
                         } catch (e: ThemePackageException.TooLarge) {
-                            if (mapped == ThemePackageFormat.THEME_ENTRY) throw e
+                            if (isManifest) throw e
                             null
+                        }
+                        val data = if (raw != null && raw.size > ThemePackageFormat.MAX_IMAGE_BYTES) {
+                            transcode.transcode(raw, ThemePackageFormat.MAX_TRANSCODE_DIMENSION)
+                                ?.takeIf { it.size <= ThemePackageFormat.MAX_IMAGE_BYTES }
+                        } else {
+                            raw
                         }
                         if (data != null) {
                             total += data.size

@@ -13,7 +13,10 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -71,16 +74,22 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.rememberAsyncImagePainter
+import java.io.File
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -100,6 +109,7 @@ import org.bakasu.bakasu.ui.component.SwipeableSnackbarHost
 import org.bakasu.bakasu.ui.component.WarningCard
 import org.bakasu.bakasu.ui.component.rememberConfirmDialog
 import org.bakasu.bakasu.ui.component.rememberLoadingDialog
+import org.bakasu.bakasu.ui.component.settings.LocalSegmentedItemShape
 import org.bakasu.bakasu.ui.component.settings.SegmentedColumn
 import org.bakasu.bakasu.ui.component.settings.SettingsBaseWidget
 import org.bakasu.bakasu.ui.navigation.LocalNavigator
@@ -589,6 +599,9 @@ private fun StatusCard(
         }
     }
 
+    val themeConfig: ThemeConfig = koinInject()
+    val cardBackground = themeConfig.appliedCardBackground
+
     when {
         systemStatus.ksuVersion != null -> {
             val workingModeText = when {
@@ -601,44 +614,51 @@ private fun StatusCard(
                 else -> "Built-in"
             }
 
-            SettingsBaseWidget(
-                icon = Icons.TwoTone.TaskAlt,
-                iconSize = 18.dp,
-                title = workingModeText,
-                description = stringResource(
-                    R.string.home_short_info,
-                    uiState.systemInfo.superuserCount,
-                    uiState.systemInfo.moduleCount,
-                ),
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                foreContent = {
-                    Spacer(Modifier.width(8.dp))
+            val tint = MaterialTheme.colorScheme.primaryContainer
+            StatusCardBackground(
+                background = cardBackground,
+                tint = tint,
+                onTint = MaterialTheme.colorScheme.onPrimaryContainer,
+            ) { surface ->
+                SettingsBaseWidget(
+                    icon = Icons.TwoTone.TaskAlt,
+                    iconSize = 18.dp,
+                    title = workingModeText,
+                    description = stringResource(
+                        R.string.home_short_info,
+                        uiState.systemInfo.superuserCount,
+                        uiState.systemInfo.moduleCount,
+                    ),
+                    containerColor = surface?.containerColor ?: tint,
+                    contentColor = surface?.contentColor,
+                    isOnBackground = surface?.isOnBackground ?: true,
+                    foreContent = {
+                        Spacer(Modifier.width(8.dp))
 
-                    // 工作模式标签
-                    LabelText(
-                        label = workingModeSurfaceText,
-                        containerColor = MaterialTheme.colorScheme.primary,
-                    )
-
-                    if (systemStatus.isLateLoadMode) {
-                        Spacer(Modifier.width(6.dp))
                         LabelText(
-                            label = stringResource(id = R.string.jailbreak_mode),
+                            label = workingModeSurfaceText,
                             containerColor = MaterialTheme.colorScheme.primary,
                         )
-                    }
 
-                    // 架构标签
-                    if (Os.uname().machine != "aarch64") {
-                        Spacer(Modifier.width(6.dp))
-                        LabelText(
-                            label = Os.uname().machine,
-                            containerColor = MaterialTheme.colorScheme.primary,
-                        )
-                    }
-                },
-                onClick = onClick,
-            )
+                        if (systemStatus.isLateLoadMode) {
+                            Spacer(Modifier.width(6.dp))
+                            LabelText(
+                                label = stringResource(id = R.string.jailbreak_mode),
+                                containerColor = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+
+                        if (Os.uname().machine != "aarch64") {
+                            Spacer(Modifier.width(6.dp))
+                            LabelText(
+                                label = Os.uname().machine,
+                                containerColor = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                    },
+                    onClick = onClick,
+                )
+            }
         }
 
         systemStatus.kernelVersion.isGKI() -> {
@@ -679,6 +699,63 @@ private fun StatusCard(
                 description = stringResource(R.string.home_unsupported_reason),
             )
         }
+    }
+}
+
+private data class StatusCardSurface(
+    val containerColor: Color?,
+    val contentColor: Color?,
+    val isOnBackground: Boolean,
+)
+
+@Composable
+private fun StatusCardBackground(
+    background: File?,
+    tint: Color,
+    onTint: Color,
+    content: @Composable (StatusCardSurface?) -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(LocalSegmentedItemShape.current),
+    ) {
+        if (background != null) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(tint.copy(alpha = 0.55f)),
+            )
+            Image(
+                painter = rememberAsyncImagePainter(background),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                alignment = Alignment.TopCenter,
+                modifier = Modifier.matchParentSize(),
+            )
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(
+                        Brush.verticalGradient(
+                            0f to tint.copy(alpha = 0.35f),
+                            0.5f to tint.copy(alpha = 0.55f),
+                            1f to Color.Black.copy(alpha = 0.35f),
+                        ),
+                    ),
+            )
+        }
+        content(
+            if (background != null) {
+                StatusCardSurface(
+                    containerColor = Color.Transparent,
+                    contentColor = onTint,
+                    isOnBackground = false,
+                )
+            } else {
+                null
+            },
+        )
     }
 }
 

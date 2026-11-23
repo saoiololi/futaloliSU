@@ -23,7 +23,7 @@ class ThemePackageRepository(
         val bytes = appContext.contentResolver.openInputStream(uri)
             ?.use { input -> readBounded(input, ThemePackageFormat.MAX_TOTAL_BYTES * 2) }
             ?: throw IOException("无法读取所选文件")
-        val plain = SukisuThemePackage.normalizeToPlainZip(bytes)
+        val plain = SukisuThemePackage.normalizeToPlainZip(bytes, AndroidImageTranscoder)
         storage.importPackage(ByteArrayInputStream(plain), id, AndroidImageSizeProbe)
     }
 
