@@ -637,6 +637,13 @@ fun Modifier.blurSource(): Modifier {
     } ?: this
 }
 
+@Composable
+fun ThemeConfig.topBarContainerColor(cardAlpha: Float): Color = if (isEnableBlur || customBackgroundUri != null) {
+    Color.Transparent
+} else {
+    MaterialTheme.colorScheme.surfaceContainer.copy(alpha = cardAlpha)
+}
+
 /**
  * Render blur when backdrop available
  * Falls back to redrawing the app background below the content so translucent bars do not show

@@ -109,6 +109,7 @@ import org.bakasu.bakasu.ui.theme.CardConfig
 import org.bakasu.bakasu.ui.theme.ThemeConfig
 import org.bakasu.bakasu.ui.theme.blurEffect
 import org.bakasu.bakasu.ui.theme.blurSource
+import org.bakasu.bakasu.ui.theme.topBarContainerColor
 import org.bakasu.bakasu.ui.util.LocalPermissionRequestInterface
 import org.bakasu.bakasu.ui.util.LocalSnackbarHost
 import org.bakasu.bakasu.ui.util.adaptiveScaffoldWindowInsets
@@ -494,6 +495,8 @@ private fun TopBar(
     val cardConfig: CardConfig = koinInject()
     val navigator = LocalNavigator.current
 
+    val topBarColor = themeConfig.topBarContainerColor(cardConfig.cardAlpha)
+
     LargeFlexibleTopAppBar(
         modifier = Modifier.blurEffect(),
         title = {
@@ -502,18 +505,8 @@ private fun TopBar(
             )
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor =
-                if (themeConfig.isEnableBlur) {
-                    Color.Transparent
-                } else {
-                    MaterialTheme.colorScheme.surfaceContainer.copy(cardConfig.cardAlpha)
-                },
-            scrolledContainerColor =
-                if (themeConfig.isEnableBlur) {
-                    Color.Transparent
-                } else {
-                    MaterialTheme.colorScheme.surfaceContainer.copy(cardConfig.cardAlpha)
-                },
+            containerColor = topBarColor,
+            scrolledContainerColor = topBarColor,
         ),
         actions = {
             if (uiState.isCoreDataLoaded) {

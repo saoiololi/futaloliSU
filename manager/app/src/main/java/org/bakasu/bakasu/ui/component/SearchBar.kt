@@ -100,6 +100,7 @@ import org.bakasu.bakasu.ui.theme.CardConfig
 import org.bakasu.bakasu.ui.theme.ThemeConfig
 import org.bakasu.bakasu.ui.theme.blurEffect
 import org.bakasu.bakasu.ui.theme.renderBackgroundBlur
+import org.bakasu.bakasu.ui.theme.topBarContainerColor
 import org.bakasu.bakasu.ui.util.LocalPagerPage
 import org.bakasu.bakasu.ui.util.LocalSelectedPage
 import org.koin.compose.koinInject
@@ -551,6 +552,8 @@ fun SearchAppBar(
         }
     }
 
+    val searchBarContainerColor = themeConfig.topBarContainerColor(cardConfig.cardAlpha)
+
     Column {
         LargeFlexibleTopAppBar(
             modifier = Modifier.blurEffect(),
@@ -591,18 +594,8 @@ fun SearchAppBar(
             },
             windowInsets = TopAppBarDefaults.windowInsets.add(WindowInsets(left = 12.dp)),
             colors = TopAppBarDefaults.topAppBarColors(
-                containerColor =
-                    if (themeConfig.isEnableBlur) {
-                        Color.Transparent
-                    } else {
-                        MaterialTheme.colorScheme.surfaceContainer.copy(alpha = cardConfig.cardAlpha)
-                    },
-                scrolledContainerColor =
-                    if (themeConfig.isEnableBlur) {
-                        Color.Transparent
-                    } else {
-                        MaterialTheme.colorScheme.surfaceContainer.copy(alpha = cardConfig.cardAlpha)
-                    },
+                containerColor = searchBarContainerColor,
+                scrolledContainerColor = searchBarContainerColor,
             ),
         )
 
